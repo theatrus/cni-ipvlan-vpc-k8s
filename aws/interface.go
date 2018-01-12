@@ -86,6 +86,9 @@ func (c *interfaceClient) NewInterfaceOnSubnetAtIndex(index int, secGrps []strin
 	changes.SetDeleteOnTermination(true)
 	modifyReq := &ec2.ModifyNetworkInterfaceAttributeInput{}
 	modifyReq.SetAttachment(changes)
+	if c.aws.IsNitro() {
+		modifyReq.SourceDestCheck.Value = aws.Bool(false)
+	}
 	modifyReq.SetNetworkInterfaceId(*resp.NetworkInterface.NetworkInterfaceId)
 
 	_, err = client.ModifyNetworkInterfaceAttribute(modifyReq)

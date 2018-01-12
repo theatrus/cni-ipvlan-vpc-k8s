@@ -8,6 +8,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/aws/aws-sdk-go/service/ec2/ec2iface"
+	"strings"
 	"time"
 )
 
@@ -59,6 +60,19 @@ func init() {
 	DefaultClient = defaultClient
 	defaultClient.sess = session.Must(session.NewSession())
 	defaultClient.metaData = ec2metadata.New(defaultClient.sess)
+}
+
+// IsNitro checks if an instance type is a "Nitro" / KVM instance
+func (c *awsclient) IsNitro() bool {
+	idDoc, err := c.getIDDoc()
+	if err != nil {
+		return false
+	}
+	t := idDoc.InstanceType
+	if strings.HasPrefix(t, "c5.") || strings.HasPrefix(t, "m5.") {
+		return true
+	}
+	return false
 }
 
 func (c *awsclient) getIDDoc() (*ec2metadata.EC2InstanceIdentityDocument, error) {
